@@ -2,7 +2,7 @@ name: native_toolchain_rust
 description: >
   Rust support for Dart's build hooks.
   Automatically builds and bundles your Rust code with your Dart code!
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/GregoryConrad/native_toolchain_rust
 repository: https://github.com/GregoryConrad/native_toolchain_rust
 issue_tracker: https://github.com/GregoryConrad/native_toolchain_rust/issues

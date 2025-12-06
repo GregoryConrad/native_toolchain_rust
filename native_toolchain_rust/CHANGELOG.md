@@ -1,3 +1,8 @@
+## 1.0.1
+
+ - **FIX**: improve colon handling in dependency discovery for windows ([#45](https://github.com/GregoryConrad/native_toolchain_rust/issues/45)).
+ - **FIX**: add all build dependencies to the output for rebuilds ([#44](https://github.com/GregoryConrad/native_toolchain_rust/issues/44)).
+
 ## 1.0.0
 
  - Rebrand to native_toolchain_rust from native_toolchain_rs

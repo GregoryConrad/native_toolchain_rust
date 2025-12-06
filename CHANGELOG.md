@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-12-06
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`native_toolchain_rust` - `v1.0.1`](#native_toolchain_rust---v101)
+
+---
+
+#### `native_toolchain_rust` - `v1.0.1`
+
+ - **FIX**: improve colon handling in dependency discovery for windows ([#45](https://github.com/GregoryConrad/native_toolchain_rust/issues/45)).
+ - **FIX**: add all build dependencies to the output for rebuilds ([#44](https://github.com/GregoryConrad/native_toolchain_rust/issues/44)).
+
+
 ## 2025-11-27
 
 ### Changes
