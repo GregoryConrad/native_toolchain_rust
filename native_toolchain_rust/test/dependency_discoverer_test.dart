@@ -56,25 +56,6 @@ target/debug/librust_lib.a: /path/to/some/other/file.rs
       );
     });
 
-    test('discover ignores lines without a colon', () {
-      final dependencyFilePath = path.join(tempDir.path, 'test.d');
-      File(dependencyFilePath).writeAsStringSync('''
-invalid line
-target/debug/librust_lib.a: src/lib.rs
-''');
-
-      final dependencies = dependencyDiscoverer.discover(dependencyFilePath);
-
-      expect(
-        dependencies,
-        containsAll([
-          path.toUri('src/lib.rs'),
-          path.toUri(dependencyFilePath),
-        ]),
-      );
-      expect(dependencies.length, 2);
-    });
-
     test('discover handles an empty dependency file', () {
       final dependencyFilePath = path.join(tempDir.path, 'test.d');
       File(dependencyFilePath).writeAsStringSync('');

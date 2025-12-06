@@ -16,13 +16,7 @@ interface class DependencyDiscoverer {
     logger.fine('Discovering dependencies in $dependencyFilePath');
     return File(dependencyFilePath)
         .readAsLinesSync()
-        .map((line) {
-          final splitIndex = line.indexOf(':');
-          if (splitIndex < 0) return null;
-          return line.substring(splitIndex + 1).trim();
-        })
-        .nonNulls
-        .expand((files) => files.split(' '))
+        .expand((line) => line.trim().split(' ').skip(1))
         .followedBy([dependencyFilePath])
         .map(path.toUri);
   }
