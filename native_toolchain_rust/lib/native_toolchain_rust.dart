@@ -8,6 +8,7 @@ import 'package:native_toolchain_rust/src/build_environment.dart';
 import 'package:native_toolchain_rust/src/build_runner.dart';
 import 'package:native_toolchain_rust/src/crate_info_validator.dart';
 import 'package:native_toolchain_rust/src/crate_resolver.dart';
+import 'package:native_toolchain_rust/src/dependency_discoverer.dart';
 import 'package:native_toolchain_rust/src/process_runner.dart';
 import 'package:native_toolchain_rust/src/toml_parsing.dart';
 
@@ -108,6 +109,7 @@ final class RustBuilder implements Builder {
       toolchainTomlParser: toolchainTomlParser,
       cargoManifestParser: cargoManifestParser,
     );
+    final dependencyDiscoverer = DependencyDiscoverer(logger);
 
     return RustBuildRunner(
       config: this,
@@ -116,6 +118,7 @@ final class RustBuilder implements Builder {
       crateDirectoryResolver: crateDirectoryResolver,
       buildEnvironmentFactory: buildEnvironmentFactory,
       crateInfoValidator: crateInfoValidator,
+      dependencyDiscoverer: dependencyDiscoverer,
     ).run(input: input, output: output, assetRouting: assetRouting);
   }
 }

@@ -9,6 +9,7 @@ import 'package:native_toolchain_rust/src/build_environment.dart';
 import 'package:native_toolchain_rust/src/config_mapping.dart';
 import 'package:native_toolchain_rust/src/crate_info_validator.dart';
 import 'package:native_toolchain_rust/src/crate_resolver.dart';
+import 'package:native_toolchain_rust/src/dependency_discoverer.dart';
 import 'package:native_toolchain_rust/src/process_runner.dart';
 import 'package:path/path.dart' as path;
 
@@ -21,6 +22,7 @@ interface class RustBuildRunner {
     required this.processRunner,
     required this.buildEnvironmentFactory,
     required this.crateInfoValidator,
+    required this.dependencyDiscoverer,
   });
 
   final RustBuilder config;
@@ -29,6 +31,7 @@ interface class RustBuildRunner {
   final ProcessRunner processRunner;
   final BuildEnvironmentFactory buildEnvironmentFactory;
   final CrateInfoValidator crateInfoValidator;
+  final DependencyDiscoverer dependencyDiscoverer;
 
   Future<void> run({
     required BuildInput input,
@@ -75,9 +78,6 @@ interface class RustBuildRunner {
       toolchainTomlPath: path.join(crateDirectory.path, 'rust-toolchain.toml'),
     );
 
-    // NOTE: re-run build whenever anything in the Rust directory changes
-    output.dependencies.add(crateDirectory.uri);
-
     logger.info('Ensuring $toolchainChannel is installed');
     await ensureToolchainDownloaded(crateDirectory.path);
 
@@ -107,22 +107,25 @@ interface class RustBuildRunner {
       },
     );
 
+    final binaryFilePath = path.join(
+      outputDir,
+      targetTriple,
+      cargoBuildMode,
+      targetOS.libraryFileName(crateName, linkMode).replaceAll('-', '_'),
+    );
+
+    // NOTE: re-run build whenever any of the dependencies change
+    output.dependencies.addAll(
+      dependencyDiscoverer.discover(path.setExtension(binaryFilePath, '.d')),
+    );
+
     for (final routing in assetRouting) {
       output.assets.code.add(
         CodeAsset(
           package: input.packageName,
           name: assetName,
           linkMode: linkMode,
-          file: path.toUri(
-            path.join(
-              outputDir,
-              targetTriple,
-              cargoBuildMode,
-              targetOS
-                  .libraryFileName(crateName, linkMode)
-                  .replaceAll('-', '_'),
-            ),
-          ),
+          file: path.toUri(binaryFilePath),
         ),
         routing: routing,
       );
