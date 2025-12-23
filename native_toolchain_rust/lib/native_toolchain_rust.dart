@@ -19,7 +19,7 @@ enum BuildMode {
   /// Build in release mode; i.e., `cargo build --release`
   release,
 
-  /// Build in debug mode; i.e., `cargo build --debug`
+  /// Build in debug mode; i.e., a regular `cargo build`
   debug,
 }
 
