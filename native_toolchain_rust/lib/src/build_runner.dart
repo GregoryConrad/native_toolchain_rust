@@ -61,7 +61,7 @@ interface class RustBuildRunner {
       :enableDefaultFeatures,
       :extraCargoBuildArgs,
       :extraCargoEnvironmentVariables,
-      buildMode: BuildMode(name: cargoBuildMode),
+      :buildMode,
     ) = config;
     final crateDirectory = crateDirectoryResolver.resolveCrateDirectory(
       rootPath: path.fromUri(input.packageRoot),
@@ -88,7 +88,10 @@ interface class RustBuildRunner {
         toolchainChannel,
         'cargo',
         'build',
-        '--$cargoBuildMode',
+        ...switch (buildMode) {
+          BuildMode.release => ['--release'],
+          BuildMode.debug => [],
+        },
         '--manifest-path',
         manifestPath,
         '--package',
@@ -110,7 +113,7 @@ interface class RustBuildRunner {
     final binaryFilePath = path.join(
       outputDir,
       targetTriple,
-      cargoBuildMode,
+      buildMode.name,
       targetOS.libraryFileName(crateName, linkMode).replaceAll('-', '_'),
     );
 
