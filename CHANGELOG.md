@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-12-23
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`native_toolchain_rust` - `v1.0.2`](#native_toolchain_rust---v102)
+
+---
+
+#### `native_toolchain_rust` - `v1.0.2`
+
+ - **FIX**: pass in no extra flag for debug mode ([#47](https://github.com/GregoryConrad/native_toolchain_rust/issues/47)).
+
+
 ## 2025-12-06
 
 ### Changes

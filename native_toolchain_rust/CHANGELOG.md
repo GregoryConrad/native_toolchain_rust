@@ -1,3 +1,7 @@
+## 1.0.2
+
+ - **FIX**: pass in no extra flag for debug mode ([#47](https://github.com/GregoryConrad/native_toolchain_rust/issues/47)).
+
 ## 1.0.1
 
  - **FIX**: improve colon handling in dependency discovery for windows ([#45](https://github.com/GregoryConrad/native_toolchain_rust/issues/45)).
