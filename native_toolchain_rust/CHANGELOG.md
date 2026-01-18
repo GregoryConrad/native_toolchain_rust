@@ -1,3 +1,8 @@
+## 1.0.3
+
+ - **FIX**: use proper file extension for Android NDK ranlib on Windows ([#52](https://github.com/GregoryConrad/native_toolchain_rust/issues/52)).
+ - **FIX**: fix `<target-triple>-ranlib` command not found ([#50](https://github.com/GregoryConrad/native_toolchain_rust/issues/50)).
+
 ## 1.0.2
 
  - **FIX**: pass in no extra flag for debug mode ([#47](https://github.com/GregoryConrad/native_toolchain_rust/issues/47)).

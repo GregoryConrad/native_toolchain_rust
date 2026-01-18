@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-01-18
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`native_toolchain_rust` - `v1.0.3`](#native_toolchain_rust---v103)
+
+---
+
+#### `native_toolchain_rust` - `v1.0.3`
+
+ - **FIX**: use proper file extension for Android NDK ranlib on Windows ([#52](https://github.com/GregoryConrad/native_toolchain_rust/issues/52)).
+ - **FIX**: fix `<target-triple>-ranlib` command not found ([#50](https://github.com/GregoryConrad/native_toolchain_rust/issues/50)).
+
+
 ## 2025-12-23
 
 ### Changes
