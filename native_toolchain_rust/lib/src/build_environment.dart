@@ -44,13 +44,13 @@ interface class AndroidBuildEnvironmentFactory {
       );
     }
 
-    String getCompilerPath(String binaryName) {
+    String getBinaryPath(String binaryName, {String windowsSuffix = 'cmd'}) {
       final compilerBinariesDir = path.dirname(
         path.fromUri(cCompiler.compiler),
       );
       final binaryPath = path.join(
         compilerBinariesDir,
-        (OS.current == OS.windows) ? '$binaryName.cmd' : binaryName,
+        (OS.current == OS.windows) ? '$binaryName.$windowsSuffix' : binaryName,
       );
 
       if (!File(binaryPath).existsSync()) {
@@ -81,9 +81,9 @@ interface class AndroidBuildEnvironmentFactory {
     // 1. Ensures we are using a compatible NDK
     // 2. Also fixes build issues when just using the `clang`s directly
     const apiTarget = '35';
-    final clangPath = getCompilerPath('$ndkTargetTriple$apiTarget-clang');
-    final clangPpPath = getCompilerPath('$ndkTargetTriple$apiTarget-clang++');
-    final ranlibPath = getCompilerPath('llvm-ranlib');
+    final clangPath = getBinaryPath('$ndkTargetTriple$apiTarget-clang');
+    final clangPpPath = getBinaryPath('$ndkTargetTriple$apiTarget-clang++');
+    final ranlibPath = getBinaryPath('llvm-ranlib', windowsSuffix: 'exe');
 
     final ndkToolchainRoot = path.dirname(path.dirname(clangPath));
     final sysroot = path.join(ndkToolchainRoot, 'sysroot');
