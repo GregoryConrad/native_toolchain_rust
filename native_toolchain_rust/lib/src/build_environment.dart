@@ -83,6 +83,7 @@ interface class AndroidBuildEnvironmentFactory {
     const apiTarget = '35';
     final clangPath = getCompilerPath('$ndkTargetTriple$apiTarget-clang');
     final clangPpPath = getCompilerPath('$ndkTargetTriple$apiTarget-clang++');
+    final ranlibPath = getCompilerPath('llvm-ranlib');
 
     final ndkToolchainRoot = path.dirname(path.dirname(clangPath));
     final sysroot = path.join(ndkToolchainRoot, 'sysroot');
@@ -95,6 +96,7 @@ interface class AndroidBuildEnvironmentFactory {
       'AR_$targetTripleEnvVar': path.fromUri(cCompiler.archiver),
       'CC_$targetTripleEnvVar': clangPath,
       'CXX_$targetTripleEnvVar': clangPpPath,
+      'RANLIB_$targetTripleEnvVar': ranlibPath,
       'CARGO_TARGET_${targetTripleEnvVar.toUpperCase()}_LINKER': clangPath,
       'BINDGEN_EXTRA_CLANG_ARGS_$targetTripleEnvVar': bindgenClangArgs,
     };
