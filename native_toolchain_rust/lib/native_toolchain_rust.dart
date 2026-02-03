@@ -126,7 +126,7 @@ final class RustBuilder implements Builder {
 Logger _createDefaultLogger() {
   return Logger.detached('RustBuilder')
     ..level = Level.CONFIG
-    ..onRecord.listen((LogRecord record) {
+    ..onRecord.listen((record) {
       final output = record.level >= Level.WARNING ? stderr : stdout;
 
       // NOTE: this is an unreadable mess with cascade notation
