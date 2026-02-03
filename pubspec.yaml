@@ -11,8 +11,8 @@ workspace:
   - examples/flutter
 
 dev_dependencies:
-  melos: ^7.1.1
-  very_good_analysis: ^10.0.0
+  melos: ^7.4.0
+  very_good_analysis: ^10.1.0
 
 melos:
   scripts:
