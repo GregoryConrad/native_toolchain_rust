@@ -8,7 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  hooks: ^1.0.0
+  hooks: ^1.0.1
   native_toolchain_rust: ^1.0.3
 
 dev_dependencies:
