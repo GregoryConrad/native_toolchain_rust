@@ -26,15 +26,13 @@
         devShells = {
           default = pkgs.mkShell {
             packages = with pkgs; [
-              # TODO uncomment once we get flutter >3.38 in nixpkgs:
-              # flutter
+              flutter341
               rustup
               llvmPackages_20.clangUseLLVM
             ];
 
             env = {
-              # TODO uncomment once we get flutter >3.38 in nixpkgs:
-              # FLUTTER_ROOT = "${pkgs.flutter}";
+              FLUTTER_ROOT = "${pkgs.flutter341}";
               RUST_BACKTRACE = "1";
               LIBCLANG_PATH = "${pkgs.llvmPackages_20.libclang.lib}/lib";
             };
