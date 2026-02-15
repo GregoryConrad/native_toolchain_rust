@@ -26,13 +26,13 @@
         devShells = {
           default = pkgs.mkShell {
             packages = with pkgs; [
-              flutter341
+              flutter
               rustup
               llvmPackages_20.clangUseLLVM
             ];
 
             env = {
-              FLUTTER_ROOT = "${pkgs.flutter341}";
+              FLUTTER_ROOT = "${pkgs.flutter}";
               RUST_BACKTRACE = "1";
               LIBCLANG_PATH = "${pkgs.llvmPackages_20.libclang.lib}/lib";
             };
