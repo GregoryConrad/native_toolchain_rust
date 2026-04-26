@@ -29,10 +29,9 @@ void main() {
 
       expect(
         dependencies,
-        containsAll([
+        unorderedEquals([
           path.toUri('src/lib.rs'),
           path.toUri('/path/to/some/other/file.rs'),
-          path.toUri(dependencyFilePath),
         ]),
       );
     });
@@ -48,10 +47,9 @@ target/debug/librust_lib.a: /path/to/some/other/file.rs
 
       expect(
         dependencies,
-        containsAll([
+        unorderedEquals([
           path.toUri('src/lib.rs'),
           path.toUri('/path/to/some/other/file.rs'),
-          path.toUri(dependencyFilePath),
         ]),
       );
     });
@@ -62,14 +60,26 @@ target/debug/librust_lib.a: /path/to/some/other/file.rs
 
       final dependencies = dependencyDiscoverer.discover(dependencyFilePath);
 
-      expect(
-        dependencies,
-        containsAll([
-          path.toUri(dependencyFilePath),
-        ]),
-      );
-      expect(dependencies.length, 1);
+      expect(dependencies, isEmpty);
     });
+
+    test(
+      'discover does not include the dependency file itself',
+      () {
+        // Cargo refreshes the mtime of the dep-info file on every invocation,
+        // even for no-op rebuilds. Including it in the dependency list causes
+        // Flutter's build graph to emit "File modified during build. Build
+        // must be rerun." warnings. See issue #73.
+        final dependencyFilePath = path.join(tempDir.path, 'test.d');
+        File(dependencyFilePath).writeAsStringSync(
+          'target/debug/librust_lib.a: src/lib.rs',
+        );
+
+        final dependencies = dependencyDiscoverer.discover(dependencyFilePath);
+
+        expect(dependencies, isNot(contains(path.toUri(dependencyFilePath))));
+      },
+    );
 
     test(
       'discover throws an exception if the dependency file is not found',
