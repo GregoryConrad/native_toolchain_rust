@@ -6,7 +6,7 @@ environment:
   sdk: ^3.9.0
 
 dependencies:
-  hooks: ^1.0.2
+  hooks: ^1.0.3
   native_toolchain_rust: ^1.0.4
 
 dev_dependencies:
