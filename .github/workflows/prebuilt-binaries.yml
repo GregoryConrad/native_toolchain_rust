@@ -1,0 +1,79 @@
+name: Publish Prebuilt Binaries
+
+# Publishes the prebuilt binaries of the dart_only_prebuilt_binaries example
+# to a GitHub release, so they can be consumed via the (opt-in)
+# prebuilt binaries support of native_toolchain_rust.
+# See examples/dart_only_prebuilt_binaries/README.md for more information.
+
+on:
+  workflow_dispatch:
+
+env:
+  example_dir: examples/dart_only_prebuilt_binaries
+
+permissions:
+  contents: write
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Determine the release tag from the example's pubspec version
+        id: tag
+        run: |
+          version=$(sed -n 's/^version: //p' "$example_dir/pubspec.yaml")
+          echo "tag=dart_only_prebuilt_binaries_example-v$version" >> "$GITHUB_OUTPUT"
+      - name: Create the release, if it does not exist yet
+        env:
+          GH_TOKEN: ${{ github.token }}
+          tag: ${{ steps.tag.outputs.tag }}
+        run: |
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" ||
+            gh release create "$tag" --repo "$GITHUB_REPOSITORY" \
+              --title "$tag" \
+              --notes "Prebuilt binaries for the dart_only_prebuilt_binaries example."
+
+  upload_binaries:
+    needs: create_release
+    strategy:
+      matrix:
+        # More targets (Android, iOS, ...) can be added analogously.
+        # They are omitted here to keep this example workflow simple.
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            binary: libdart_only_prebuilt_binaries_example.dylib
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            binary: libdart_only_prebuilt_binaries_example.dylib
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary: libdart_only_prebuilt_binaries_example.so
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            binary: libdart_only_prebuilt_binaries_example.so
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary: dart_only_prebuilt_binaries_example.dll
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install the Rust target
+        working-directory: ${{ env.example_dir }}/rust
+        run: rustup target add ${{ matrix.target }}
+      - name: Build the cdylib
+        working-directory: ${{ env.example_dir }}/rust
+        run: cargo build --release --target ${{ matrix.target }}
+      - name: Rename the binary to its target-specific asset name
+        run: cp "target/${{ matrix.target }}/release/${{ matrix.binary }}" "dart_only_prebuilt_binaries_example-${{ matrix.target }}.bin"
+      - name: Upload the binary to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          tag: ${{ needs.create_release.outputs.tag }}
+        run: gh release upload "$tag" --repo "$GITHUB_REPOSITORY" --clobber "dart_only_prebuilt_binaries_example-${{ matrix.target }}.bin"

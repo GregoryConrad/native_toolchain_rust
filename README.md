@@ -179,6 +179,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 ```
 
+For a complete working example, see the
+[dart_only_prebuilt_binaries example](examples/dart_only_prebuilt_binaries)
+and its [prebuilt-binaries workflow](.github/workflows/prebuilt-binaries.yml).
+
 Downstream users can then consume those binaries with the URL template from above:
 ```toml
 [prebuilt-binaries.some_package_name]

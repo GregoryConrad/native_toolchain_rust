@@ -42,4 +42,8 @@ coverage/
 /target/
 /Cargo.lock
 
+# Prebuilt binaries opt-in config (see examples/dart_only_prebuilt_binaries):
+# by ignoring it, CI always builds the Rust code from source.
+native_toolchain_rust.toml
+
 .direnv/

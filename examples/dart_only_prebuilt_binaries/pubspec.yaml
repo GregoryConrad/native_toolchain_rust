@@ -1,0 +1,17 @@
+name: dart_only_prebuilt_binaries_example
+publish_to: none
+resolution: workspace
+# NOTE: the version is used to resolve `{version}` in the prebuilt binary
+# download URL; see the README for more information.
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  hooks: ^2.0.2
+  native_toolchain_rust: ^1.0.4+0
+
+dev_dependencies:
+  ffigen: ^20.1.0
+  test: ^1.29.0

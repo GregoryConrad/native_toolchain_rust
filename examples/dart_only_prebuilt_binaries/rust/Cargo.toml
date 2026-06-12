@@ -1,0 +1,9 @@
+[package]
+name = "dart-only-prebuilt-binaries-example"
+edition = "2024"
+
+[lib]
+crate-type = ["staticlib", "cdylib"]
+
+[build-dependencies]
+cbindgen = "0.29.0"

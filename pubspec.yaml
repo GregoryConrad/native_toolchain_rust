@@ -8,6 +8,7 @@ environment:
 workspace:
   - native_toolchain_rust
   - examples/dart_only
+  - examples/dart_only_prebuilt_binaries
   - examples/flutter
 
 dev_dependencies:
