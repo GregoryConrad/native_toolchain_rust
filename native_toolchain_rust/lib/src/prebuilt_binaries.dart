@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
+import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:native_toolchain_rust/src/exception.dart';
@@ -181,12 +183,19 @@ interface class PrebuiltBinaryDownloader {
 
   /// Downloads the file at [url] to [destinationPath],
   /// following any redirects along the way.
+  ///
+  /// The file only ever appears at [destinationPath] in its entirety;
+  /// a failed/interrupted download will not leave a corrupt file behind
+  /// (which is essential, as [destinationPath] may be in a shared cache).
   Future<void> download({
     required Uri url,
     required String destinationPath,
   }) async {
     logger.info('Downloading prebuilt binary from $url to $destinationPath');
     final client = HttpClient();
+    final temporaryFile = File(
+      '$destinationPath.$pid.${DateTime.now().microsecondsSinceEpoch}.part',
+    );
     try {
       final request = await client.getUrl(url);
       final response = await request.close();
@@ -202,9 +211,9 @@ interface class PrebuiltBinaryDownloader {
         );
       }
 
-      final destinationFile = File(destinationPath);
-      destinationFile.parent.createSync(recursive: true);
-      await response.pipe(destinationFile.openWrite());
+      temporaryFile.parent.createSync(recursive: true);
+      await response.pipe(temporaryFile.openWrite());
+      temporaryFile.renameSync(destinationPath);
       logger.info('Finished downloading prebuilt binary to $destinationPath');
     } on IOException catch (exception, stackTrace) {
       logger.severe(
@@ -220,6 +229,9 @@ interface class PrebuiltBinaryDownloader {
       );
     } finally {
       client.close();
+      if (temporaryFile.existsSync()) {
+        temporaryFile.deleteSync();
+      }
     }
   }
 }
@@ -252,18 +264,18 @@ interface class PrebuiltBinaryFetcher {
   Future<({String binaryFilePath, List<String> dependencies})?> fetch({
     required String packageName,
     required String packageRootPath,
-    required String outputDirectoryPath,
+    required String sharedOutputDirectoryPath,
     required String crateName,
     required String targetTriple,
     required OS targetOS,
     required LinkMode linkMode,
   }) async {
     final rootProjectPath = rootProjectResolver.resolveRootProjectPath(
-      outputDirectoryPath,
+      sharedOutputDirectoryPath,
     );
     if (rootProjectPath == null) {
       logger.info(
-        'Could not resolve the root project from $outputDirectoryPath; '
+        'Could not resolve the root project from $sharedOutputDirectoryPath; '
         'skipping the prebuilt binary check and building from source',
       );
       return null;
@@ -301,12 +313,22 @@ interface class PrebuiltBinaryFetcher {
       },
     );
 
+    // NOTE: binaries are cached in the (config-independent) shared output
+    // directory, keyed by their resolved download URL. A new package version
+    // or an edited URL template yields a new URL (and thus a fresh download),
+    // while build hook re-runs with an unchanged URL reuse the cached binary.
+    final urlChecksum = sha256.convert(utf8.encode(url.toString()));
     final binaryFilePath = path.join(
-      outputDirectoryPath,
+      sharedOutputDirectoryPath,
       'prebuilt',
+      urlChecksum.toString(),
       libraryFileName,
     );
-    await downloader.download(url: url, destinationPath: binaryFilePath);
+    if (File(binaryFilePath).existsSync()) {
+      logger.info('Reusing the cached prebuilt binary at $binaryFilePath');
+    } else {
+      await downloader.download(url: url, destinationPath: binaryFilePath);
+    }
 
     // NOTE: re-run the build hook whenever the prebuilt binary config
     // (download URL) or the package version may have changed.

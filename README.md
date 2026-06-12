@@ -120,6 +120,10 @@ Some notes:
   It must be a `cdylib` for dynamic linking, which is what Dart/Flutter uses on all platforms as of now.
 - The downloaded binary is saved locally under the correct platform-specific library name,
   so the remote file name in the URL template does not matter.
+- Downloaded binaries are cached in your project's `.dart_tool` directory,
+  keyed by their resolved download URL.
+  Thus, a binary is only downloaded once per package version and target,
+  until the cache is cleared (e.g., by a `flutter clean`).
 - Only ever download binaries from a source you trust!
   You are responsible for ensuring the binaries you download are safe
   and were built from the package's actual source code.

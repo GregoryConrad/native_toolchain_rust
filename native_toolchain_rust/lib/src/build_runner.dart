@@ -85,7 +85,7 @@ interface class RustBuildRunner {
     final prebuiltBinary = await prebuiltBinaryFetcher.fetch(
       packageName: input.packageName,
       packageRootPath: path.fromUri(input.packageRoot),
-      outputDirectoryPath: path.fromUri(input.outputDirectory),
+      sharedOutputDirectoryPath: path.fromUri(input.outputDirectoryShared),
       crateName: crateName,
       targetTriple: targetTriple,
       targetOS: targetOS,

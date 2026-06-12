@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
+import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:native_toolchain_rust/src/exception.dart';
@@ -279,6 +281,19 @@ version: "1.2.3" # some comment
               request.response.redirect(serverUri.replace(path: '/binary')),
             );
             return;
+          case '/interrupted':
+            // NOTE: hand-craft a partial response (3 of 100 promised bytes)
+            // and then kill the connection, so the client reliably sees an
+            // interrupted transfer.
+            unawaited(() async {
+              final socket = await request.response.detachSocket(
+                writeHeaders: false,
+              );
+              socket.write('HTTP/1.1 200 OK\r\ncontent-length: 100\r\n\r\nabc');
+              await socket.flush();
+              socket.destroy();
+            }());
+            return;
           default:
             request.response.statusCode = HttpStatus.notFound;
         }
@@ -327,6 +342,23 @@ version: "1.2.3" # some comment
     );
 
     test(
+      'download leaves no file behind when interrupted mid-transfer',
+      () async {
+        final destinationPath = path.join(tempDir.path, 'lib.so');
+
+        await expectLater(
+          () => downloader.download(
+            url: serverUri.replace(path: '/interrupted'),
+            destinationPath: destinationPath,
+          ),
+          throwsA(isA<RustPrebuiltBinaryException>()),
+        );
+
+        expect(tempDir.listSync(), isEmpty);
+      },
+    );
+
+    test(
       'download throws RustPrebuiltBinaryException on connection errors',
       () async {
         await server.close(force: true);
@@ -350,20 +382,33 @@ version: "1.2.3" # some comment
     late MockPrebuiltBinaryDownloader mockDownloader;
     late PrebuiltBinaryFetcher fetcher;
 
+    late Directory tempDir;
+    late String sharedOutputDirectoryPath;
+
     final rootProjectPath = path.join(path.separator, 'home', 'user', 'app');
     final packageRootPath = path.join(path.separator, 'pub', 'my_package');
-    final outputDirectoryPath = path.join(rootProjectPath, '.dart_tool', 'o');
     final configFilePath = path.join(
       rootProjectPath,
       prebuiltBinaryConfigFileName,
     );
     final pubspecPath = path.join(packageRootPath, 'pubspec.yaml');
 
+    String cachePathForUrl(Uri url, String libraryFileName) {
+      return path.join(
+        sharedOutputDirectoryPath,
+        'prebuilt',
+        sha256.convert(utf8.encode(url.toString())).toString(),
+        libraryFileName,
+      );
+    }
+
     setUpAll(() {
       registerFallbackValue(Uri());
     });
 
     setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('prebuilt_fetcher_test');
+      sharedOutputDirectoryPath = tempDir.path;
       mockRootProjectResolver = MockRootProjectResolver();
       mockConfigParser = MockPrebuiltBinaryConfigParser();
       mockPubspecVersionParser = MockPubspecVersionParser();
@@ -379,13 +424,17 @@ version: "1.2.3" # some comment
       );
     });
 
+    tearDown(() {
+      tempDir.deleteSync(recursive: true);
+    });
+
     Future<({String binaryFilePath, List<String> dependencies})?> fetch({
       LinkMode? linkMode,
     }) {
       return fetcher.fetch(
         packageName: 'my_package',
         packageRootPath: packageRootPath,
-        outputDirectoryPath: outputDirectoryPath,
+        sharedOutputDirectoryPath: sharedOutputDirectoryPath,
         crateName: 'my-crate',
         targetTriple: 'x86_64-unknown-linux-gnu',
         targetOS: OS.linux,
@@ -446,9 +495,8 @@ version: "1.2.3" # some comment
 
       final result = await fetch();
 
-      final expectedBinaryFilePath = path.join(
-        outputDirectoryPath,
-        'prebuilt',
+      final expectedBinaryFilePath = cachePathForUrl(
+        downloadUrl,
         'libmy_crate.so',
       );
       expect(result?.binaryFilePath, expectedBinaryFilePath);
@@ -475,6 +523,45 @@ version: "1.2.3" # some comment
           destinationPath: expectedBinaryFilePath,
         ),
       ).called(1);
+    });
+
+    test('fetch skips the download when the binary is cached', () async {
+      final downloadUrl = Uri.parse(
+        'https://example.com/1.2.3/x86_64-unknown-linux-gnu',
+      );
+      when(
+        () => mockRootProjectResolver.resolveRootProjectPath(any()),
+      ).thenReturn(rootProjectPath);
+      when(
+        () => mockConfigParser.parseUrlTemplate(
+          configFilePath: any(named: 'configFilePath'),
+          packageName: any(named: 'packageName'),
+        ),
+      ).thenReturn('https://example.com/{version}/{target}');
+      when(
+        () => mockPubspecVersionParser.parseVersion(any()),
+      ).thenReturn('1.2.3');
+      when(
+        () => mockDownloadUrlResolver.resolveDownloadUrl(
+          urlTemplate: any(named: 'urlTemplate'),
+          templateValues: any(named: 'templateValues'),
+        ),
+      ).thenReturn(downloadUrl);
+      final cachedBinaryFile = File(
+        cachePathForUrl(downloadUrl, 'libmy_crate.so'),
+      );
+      cachedBinaryFile.parent.createSync(recursive: true);
+      cachedBinaryFile.createSync();
+
+      final result = await fetch();
+
+      expect(result?.binaryFilePath, cachedBinaryFile.path);
+      verifyNever(
+        () => mockDownloader.download(
+          url: any(named: 'url'),
+          destinationPath: any(named: 'destinationPath'),
+        ),
+      );
     });
 
     test(
@@ -509,7 +596,10 @@ version: "1.2.3" # some comment
 
         expect(
           result?.binaryFilePath,
-          path.join(outputDirectoryPath, 'prebuilt', 'libmy_crate.a'),
+          cachePathForUrl(
+            Uri.parse('https://example.com/libmy_crate.a'),
+            'libmy_crate.a',
+          ),
         );
         verify(
           () => mockDownloadUrlResolver.resolveDownloadUrl(
