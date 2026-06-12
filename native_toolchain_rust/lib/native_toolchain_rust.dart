@@ -9,6 +9,7 @@ import 'package:native_toolchain_rust/src/build_runner.dart';
 import 'package:native_toolchain_rust/src/crate_info_validator.dart';
 import 'package:native_toolchain_rust/src/crate_resolver.dart';
 import 'package:native_toolchain_rust/src/dependency_discoverer.dart';
+import 'package:native_toolchain_rust/src/prebuilt_binaries.dart';
 import 'package:native_toolchain_rust/src/process_runner.dart';
 import 'package:native_toolchain_rust/src/toml_parsing.dart';
 
@@ -24,6 +25,12 @@ enum BuildMode {
 }
 
 /// Builds a Rust project via `rustup`.
+///
+/// Note that downstream users may also opt in to downloading a prebuilt
+/// binary by creating a `native_toolchain_rust.toml` file in the root of
+/// their project in which case `rustup` is not required.
+/// For more information, see
+/// https://github.com/GregoryConrad/native_toolchain_rust?tab=readme-ov-file#prebuilt-binaries
 final class RustBuilder implements Builder {
   /// Creates a [RustBuilder] with the supplied configuration.
   const RustBuilder({
@@ -110,6 +117,17 @@ final class RustBuilder implements Builder {
       cargoManifestParser: cargoManifestParser,
     );
     final dependencyDiscoverer = DependencyDiscoverer(logger);
+    final prebuiltBinaryFetcher = PrebuiltBinaryFetcher(
+      logger: logger,
+      rootProjectResolver: const RootProjectResolver(),
+      configParser: PrebuiltBinaryConfigParser(
+        logger,
+        tomlDocumentWrapperFactory,
+      ),
+      pubspecVersionParser: PubspecVersionParser(logger),
+      downloadUrlResolver: DownloadUrlResolver(logger),
+      downloader: PrebuiltBinaryDownloader(logger),
+    );
 
     return RustBuildRunner(
       config: this,
@@ -119,6 +137,7 @@ final class RustBuilder implements Builder {
       buildEnvironmentFactory: buildEnvironmentFactory,
       crateInfoValidator: crateInfoValidator,
       dependencyDiscoverer: dependencyDiscoverer,
+      prebuiltBinaryFetcher: prebuiltBinaryFetcher,
     ).run(input: input, output: output, assetRouting: assetRouting);
   }
 }

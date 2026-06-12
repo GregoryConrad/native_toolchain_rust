@@ -77,6 +77,19 @@ final class RustProcessException implements RustBuildException {
       ')';
 }
 
+/// A [RustBuildException] that specifies there was an issue
+/// while downloading a prebuilt binary.
+final class RustPrebuiltBinaryException implements RustBuildException {
+  /// Creates a [RustPrebuiltBinaryException] with [message].
+  const RustPrebuiltBinaryException(this.message);
+
+  /// The message associated with this [RustPrebuiltBinaryException].
+  final String message;
+
+  @override
+  String toString() => 'RustPrebuiltBinaryException(message: $message)';
+}
+
 // NOTE: this is here so that end-users can't exhaustively pattern match
 // (and thus gives us some API flexibility for new types)
 // ignore: unused_element

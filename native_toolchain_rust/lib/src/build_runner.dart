@@ -10,6 +10,7 @@ import 'package:native_toolchain_rust/src/config_mapping.dart';
 import 'package:native_toolchain_rust/src/crate_info_validator.dart';
 import 'package:native_toolchain_rust/src/crate_resolver.dart';
 import 'package:native_toolchain_rust/src/dependency_discoverer.dart';
+import 'package:native_toolchain_rust/src/prebuilt_binaries.dart';
 import 'package:native_toolchain_rust/src/process_runner.dart';
 import 'package:path/path.dart' as path;
 
@@ -23,6 +24,7 @@ interface class RustBuildRunner {
     required this.buildEnvironmentFactory,
     required this.crateInfoValidator,
     required this.dependencyDiscoverer,
+    required this.prebuiltBinaryFetcher,
   });
 
   final RustBuilder config;
@@ -32,6 +34,7 @@ interface class RustBuildRunner {
   final BuildEnvironmentFactory buildEnvironmentFactory;
   final CrateInfoValidator crateInfoValidator;
   final DependencyDiscoverer dependencyDiscoverer;
+  final PrebuiltBinaryFetcher prebuiltBinaryFetcher;
 
   Future<void> run({
     required BuildInput input,
@@ -78,6 +81,30 @@ interface class RustBuildRunner {
       toolchainTomlPath: path.join(crateDirectory.path, 'rust-toolchain.toml'),
     );
 
+    logger.info('Checking if a prebuilt binary was requested');
+    final prebuiltBinary = await prebuiltBinaryFetcher.fetch(
+      packageName: input.packageName,
+      packageRootPath: path.fromUri(input.packageRoot),
+      outputDirectoryPath: path.fromUri(input.outputDirectory),
+      crateName: crateName,
+      targetTriple: targetTriple,
+      targetOS: targetOS,
+      linkMode: linkMode,
+    );
+    if (prebuiltBinary != null) {
+      logger.info('Using the prebuilt binary and skipping the cargo build');
+      output.dependencies.addAll(prebuiltBinary.dependencies.map(path.toUri));
+      _addCodeAssets(
+        input: input,
+        assetName: assetName,
+        output: output,
+        assetRouting: assetRouting,
+        linkMode: linkMode,
+        binaryFilePath: prebuiltBinary.binaryFilePath,
+      );
+      return;
+    }
+
     logger.info('Ensuring $toolchainChannel is installed');
     await ensureToolchainDownloaded(crateDirectory.path);
 
@@ -122,6 +149,24 @@ interface class RustBuildRunner {
       dependencyDiscoverer.discover(path.setExtension(binaryFilePath, '.d')),
     );
 
+    _addCodeAssets(
+      input: input,
+      assetName: assetName,
+      output: output,
+      assetRouting: assetRouting,
+      linkMode: linkMode,
+      binaryFilePath: binaryFilePath,
+    );
+  }
+
+  void _addCodeAssets({
+    required BuildInput input,
+    required String assetName,
+    required BuildOutputBuilder output,
+    required List<AssetRouting> assetRouting,
+    required LinkMode linkMode,
+    required String binaryFilePath,
+  }) {
     for (final routing in assetRouting) {
       output.assets.code.add(
         CodeAsset(

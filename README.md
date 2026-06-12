@@ -19,7 +19,8 @@ Rust support for Dart's [build hooks](https://dart.dev/tools/hooks).
 
 ## Getting Started
 1. Install [rustup](https://rustup.rs), for Rust, on your development computer
-   (if you are a library author, consumers of your package will have to do the same)
+   (if you are a library author, consumers of your package will have to do the same,
+   unless they opt in to [Prebuilt Binaries](#prebuilt-binaries))
 2. Run `flutter pub add native_toolchain_rust hooks` for Flutter or `dart pub add native_toolchain_rust hooks` for Dart-only
 3. See [Code Setup](#code-setup)
 
@@ -89,3 +90,94 @@ targets = [
   "x86_64-apple-darwin",
 ]
 ```
+
+
+## Prebuilt Binaries
+Normally, consumers of a package built with `native_toolchain_rust` need rustup installed
+so the Rust code can be compiled from source on their machine.
+As an alternative, application developers can *opt in* to downloading prebuilt binaries
+on a per-package basis, which skips the Rust build entirely (no rustup required).
+
+To opt in, create a `native_toolchain_rust.toml` file in the root of your project
+(for [pub workspaces](https://dart.dev/tools/pub/workspaces), the workspace root):
+
+```toml
+[prebuilt-binaries.some_package_name]
+url = "https://github.com/some-user/some-repo/releases/download/v{version}/my_crate-{target}.bin"
+```
+
+The `url` is a template for where to download the binary from,
+and supports the following placeholders:
+
+| Placeholder | Description | Example |
+| --- | --- | --- |
+| `{version}` | The version of the Dart package being built | `1.2.3` |
+| `{target}` | The Rust target triple being built for | `aarch64-apple-darwin` |
+| `{lib-name}` | The platform-specific dynamic library file name | `libmy_crate.so` |
+
+Some notes:
+- The downloaded binary must match the link mode of the build.
+  It must be a `cdylib` for dynamic linking, which is what Dart/Flutter uses on all platforms as of now.
+- The downloaded binary is saved locally under the correct platform-specific library name,
+  so the remote file name in the URL template does not matter.
+- Only ever download binaries from a source you trust!
+  You are responsible for ensuring the binaries you download are safe
+  and were built from the package's actual source code.
+
+### Building From Source in CI
+Add `native_toolchain_rust.toml` to your project's `.gitignore`:
+since the file will then not exist in CI checkouts,
+your CI will always build the Rust code from source,
+while local development machines (with the file present) use the prebuilt binaries.
+
+### Publishing Prebuilt Binaries via GitHub Releases
+The URL template works great with GitHub release assets,
+which are downloadable (for public repositories) without any authentication:
+```
+https://github.com/<owner>/<repo>/releases/download/<tag>/<asset-name>
+```
+
+For example, package authors can attach a binary per target triple to each release
+in a GitHub Actions workflow:
+```yaml
+jobs:
+  upload-prebuilt-binaries:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            binary: libmy_crate.dylib
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary: libmy_crate.so
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary: my_crate.dll
+          # ...and any other targets you wish to support
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - run: rustup target add ${{ matrix.target }}
+        working-directory: rust
+      - run: cargo build --release --target ${{ matrix.target }}
+        working-directory: rust
+      # NOTE: release asset download URLs use the uploaded *file* name,
+      # so rename the binary to its target-specific asset name before uploading.
+      - run: cp "rust/target/${{ matrix.target }}/release/${{ matrix.binary }}" "my_crate-${{ matrix.target }}.bin"
+      - run: gh release upload ${{ github.ref_name }} "my_crate-${{ matrix.target }}.bin"
+        env:
+          GH_TOKEN: ${{ github.token }}
+```
+
+Downstream users can then consume those binaries with the URL template from above:
+```toml
+[prebuilt-binaries.some_package_name]
+url = "https://github.com/some-user/some-repo/releases/download/v{version}/my_crate-{target}.bin"
+```
+
