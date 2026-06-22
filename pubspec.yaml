@@ -12,7 +12,7 @@ workspace:
 
 dev_dependencies:
   melos: ^7.8.1
-  very_good_analysis: ^10.2.0
+  very_good_analysis: ^10.3.0
 
 melos:
   scripts:
