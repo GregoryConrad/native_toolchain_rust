@@ -27,7 +27,7 @@ melos:
 
     integration-test:
       description: Run integration tests for a specific package in this project.
-      run: flutter test integration_test -d ${DEVICE}
+      run: flutter test integration_test -d $DEVICE
       packageFilters:
         dirExists: integration_test
       exec:
