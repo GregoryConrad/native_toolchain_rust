@@ -53,7 +53,9 @@ extension InvokeRustup on ProcessRunner {
     String? workingDirectory,
     Map<String, String>? environment,
   }) async {
-    late ProcessException lastException;
+    final failureReasons = <String>[];
+    ProcessException? firstFailure;
+
     for (final executable in _rustupExecutables) {
       try {
         return await invoke(
@@ -63,15 +65,16 @@ extension InvokeRustup on ProcessRunner {
           environment: environment,
         );
       } on ProcessException catch (e) {
-        lastException = e;
+        firstFailure ??= e;
+        failureReasons.add('"$executable" (${e.message})');
       }
     }
 
     throw RustProcessException(
       'Failed to invoke rustup; is it installed? '
-      'Checked the following paths: $_rustupExecutables. '
+      'Tried ${failureReasons.join(', ')}. '
       'For help installing rust, see https://rustup.rs',
-      inner: lastException,
+      inner: firstFailure,
     );
   }
 }
