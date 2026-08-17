@@ -6,6 +6,19 @@ import 'package:native_toolchain_rust/src/exception.dart';
 import 'package:toml/toml.dart';
 
 @internal
+class CargoManifest {
+  const CargoManifest({
+    required this.crateName,
+    required this.libCrateTypes,
+    this.libName,
+  });
+
+  final String? libName;
+  final String crateName;
+  final List<String> libCrateTypes;
+}
+
+@internal
 interface class TomlDocumentWrapperFactory {
   const TomlDocumentWrapperFactory(this.logger);
   final Logger logger;
@@ -53,7 +66,7 @@ interface class CargoManifestParser {
   final Logger logger;
   final TomlDocumentWrapperFactory tomlDocumentFactory;
 
-  ({String crateName, List<String> libCrateTypes}) parseManifest(
+  CargoManifest parseManifest(
     String manifestPath,
   ) {
     logger.info('Looking for Cargo.toml');
@@ -81,9 +94,19 @@ The following exception was thrown: $exception''',
     }
 
     final [
+      String? libName,
       String crateName,
       List<String> libCrateTypes,
     ] = RustValidationException.compose<dynamic>([
+      () {
+        try {
+          return manifest.walk<String>('lib.name');
+        } on RustValidationException {
+          logger.fine(
+            '`lib.name` is not defined. Using `package.name` instead',
+          );
+        }
+      },
       () {
         try {
           return manifest.walk<String>('package.name');
@@ -109,7 +132,11 @@ and https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-
       },
     ]);
 
-    return (crateName: crateName, libCrateTypes: libCrateTypes);
+    return CargoManifest(
+      libName: libName,
+      crateName: crateName,
+      libCrateTypes: libCrateTypes,
+    );
   }
 }
 

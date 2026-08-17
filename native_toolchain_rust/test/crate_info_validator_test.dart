@@ -24,10 +24,12 @@ void main() {
     });
 
     test('fetchAndValidateCrateInfo returns correct info on success', () {
-      when(() => mockCargoManifestParser.parseManifest(any())).thenReturn((
-        crateName: 'my_crate',
-        libCrateTypes: ['staticlib', 'cdylib'],
-      ));
+      when(() => mockCargoManifestParser.parseManifest(any())).thenReturn(
+        const CargoManifest(
+          crateName: 'my_crate',
+          libCrateTypes: ['staticlib', 'cdylib'],
+        ),
+      );
       when(() => mockToolchainTomlParser.parseToolchainToml(any())).thenReturn((
         channel: '1.90.0',
         targets: {'aarch64-linux-android'},
@@ -44,10 +46,12 @@ void main() {
     });
 
     test('fetchAndValidateCrateInfo throws exception on validation issues', () {
-      when(() => mockCargoManifestParser.parseManifest(any())).thenReturn((
-        crateName: 'my_crate',
-        libCrateTypes: ['staticlib'],
-      ));
+      when(() => mockCargoManifestParser.parseManifest(any())).thenReturn(
+        const CargoManifest(
+          crateName: 'my_crate',
+          libCrateTypes: ['staticlib'],
+        ),
+      );
       when(() => mockToolchainTomlParser.parseToolchainToml(any())).thenReturn((
         channel: 'stable',
         targets: {'x86_64-linux-gnu'},

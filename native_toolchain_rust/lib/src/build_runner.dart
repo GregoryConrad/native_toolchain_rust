@@ -70,6 +70,7 @@ interface class RustBuildRunner {
     final outputDir = path.join(path.fromUri(input.outputDirectory), 'target');
     final manifestPath = path.join(crateDirectory.path, 'Cargo.toml');
     final (
+      :libName,
       :crateName,
       :toolchainChannel,
     ) = crateInfoValidator.fetchAndValidateCrateInfo(
@@ -114,7 +115,9 @@ interface class RustBuildRunner {
       outputDir,
       targetTriple,
       buildMode.name,
-      targetOS.libraryFileName(crateName, linkMode).replaceAll('-', '_'),
+      targetOS
+          .libraryFileName(libName ?? crateName, linkMode)
+          .replaceAll('-', '_'),
     );
 
     // NOTE: re-run build whenever any of the dependencies change

@@ -12,17 +12,28 @@ interface class CrateInfoValidator {
   final ToolchainTomlParser toolchainTomlParser;
   final CargoManifestParser cargoManifestParser;
 
-  ({String crateName, String toolchainChannel}) fetchAndValidateCrateInfo({
+  ({String? libName, String crateName, String toolchainChannel})
+  fetchAndValidateCrateInfo({
     required String manifestPath,
     required String toolchainTomlPath,
     required String targetTriple,
   }) {
+    final manifest = cargoManifestParser.parseManifest(
+      manifestPath,
+    );
+
     final [
+      String? libName,
       String crateName,
       String toolchainChannel,
     ] = RustValidationException.compose<dynamic>([
+      () => manifest.libName,
       () {
-        final (:crateName, :libCrateTypes) = cargoManifestParser.parseManifest(
+        final CargoManifest(
+          :libName,
+          :crateName,
+          :libCrateTypes,
+        ) = cargoManifestParser.parseManifest(
           manifestPath,
         );
 
@@ -71,6 +82,10 @@ For more information, see https://github.com/GregoryConrad/native_toolchain_rust
       },
     ]);
 
-    return (crateName: crateName, toolchainChannel: toolchainChannel);
+    return (
+      libName: libName,
+      crateName: crateName,
+      toolchainChannel: toolchainChannel,
+    );
   }
 }
