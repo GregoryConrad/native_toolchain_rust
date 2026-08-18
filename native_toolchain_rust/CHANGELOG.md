@@ -1,3 +1,7 @@
+## 1.0.5
+
+ - **FIX**: use lib.name instead of package.name if possible ([#98](https://github.com/GregoryConrad/native_toolchain_rust/issues/98)).
+
 ## 1.0.4+0
 
 ## 1.0.4

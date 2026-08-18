@@ -7,7 +7,7 @@ environment:
 
 dependencies:
   hooks: ^2.1.0
-  native_toolchain_rust: ^1.0.4+0
+  native_toolchain_rust: ^1.0.5
 
 dev_dependencies:
   ffigen: ^21.0.0
