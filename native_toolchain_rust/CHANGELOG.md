@@ -1,3 +1,7 @@
+## 1.0.6
+
+ - **FIX**: resolve rustup from HOME when not in PATH ([#99](https://github.com/GregoryConrad/native_toolchain_rust/issues/99)).
+
 ## 1.0.5
 
  - **FIX**: use lib.name instead of package.name if possible ([#98](https://github.com/GregoryConrad/native_toolchain_rust/issues/98)).

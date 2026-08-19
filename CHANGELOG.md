@@ -15,6 +15,27 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`native_toolchain_rust` - `v1.0.6`](#native_toolchain_rust---v106)
+
+---
+
+#### `native_toolchain_rust` - `v1.0.6`
+
+ - **FIX**: resolve rustup from HOME when not in PATH ([#99](https://github.com/GregoryConrad/native_toolchain_rust/issues/99)).
+
+
+## 2026-08-18
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`native_toolchain_rust` - `v1.0.5`](#native_toolchain_rust---v105)
 
 ---
