@@ -54,7 +54,24 @@ void main() {
       tempDir.deleteSync(recursive: true);
     });
 
-    test('parseManifest returns crate name and lib crate types', () {
+    test('parseManifest returns crate/lib name and lib crate types', () {
+      File(tempManifestPath).writeAsStringSync('''
+[package]
+name = "my_crate"
+
+[lib]
+name = "my_lib"
+crate-type = ["staticlib"]
+''');
+
+      final result = parser.parseManifest(tempManifestPath);
+
+      expect(result.crateName, 'my_crate');
+      expect(result.libCrateTypes, ['staticlib']);
+      expect(result.libName, 'my_lib');
+    });
+
+    test('parseManifest does not log error if lib.name missing', () {
       File(tempManifestPath).writeAsStringSync('''
 [package]
 name = "my_crate"
@@ -62,6 +79,11 @@ name = "my_crate"
 [lib]
 crate-type = ["staticlib"]
 ''');
+
+      final subscription = logger.onRecord.listen((record) {
+        expect(record.level, lessThan(Level.SEVERE));
+      });
+      addTearDown(subscription.cancel);
 
       final result = parser.parseManifest(tempManifestPath);
 
