@@ -80,7 +80,9 @@ name = "my_crate"
 crate-type = ["staticlib"]
 ''');
 
+      var hasLogged = false;
       final subscription = logger.onRecord.listen((record) {
+        hasLogged = true;
         expect(record.level, lessThan(Level.SEVERE));
       });
       addTearDown(subscription.cancel);
@@ -90,6 +92,7 @@ crate-type = ["staticlib"]
       expect(result.crateName, 'my_crate');
       expect(result.libCrateTypes, ['staticlib']);
       expect(result.libName, isNull);
+      expect(hasLogged, isTrue);
     });
 
     test('parseManifest throws when Cargo.toml not found', () {
