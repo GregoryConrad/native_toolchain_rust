@@ -100,7 +100,7 @@ The following exception was thrown: $exception''',
     ] = RustValidationException.compose<dynamic>([
       () {
         try {
-          return manifest.walk<String>('lib.name');
+          return manifest.walk<String?>('lib.name');
         } on RustValidationException {
           logger.fine(
             '`lib.name` is not defined. Using `package.name` instead',

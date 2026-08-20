@@ -67,6 +67,7 @@ crate-type = ["staticlib"]
 
       expect(result.crateName, 'my_crate');
       expect(result.libCrateTypes, ['staticlib']);
+      expect(result.libName, isNull);
     });
 
     test('parseManifest throws when Cargo.toml not found', () {
