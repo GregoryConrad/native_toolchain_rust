@@ -4,10 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('RustValidationException', () {
     test('compose returns results when no exceptions are thrown', () {
-      final results = RustValidationException.compose([
-        () => 1,
-        () => 2,
-      ]);
+      final results = RustValidationException.compose([() => 1, () => 2]);
       expect(results, equals([1, 2]));
     });
 

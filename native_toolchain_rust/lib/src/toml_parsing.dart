@@ -66,9 +66,7 @@ interface class CargoManifestParser {
   final Logger logger;
   final TomlDocumentWrapperFactory tomlDocumentFactory;
 
-  CargoManifest parseManifest(
-    String manifestPath,
-  ) {
+  CargoManifest parseManifest(String manifestPath) {
     logger.info('Looking for Cargo.toml');
     if (!File(manifestPath).existsSync()) {
       throw RustValidationException([
