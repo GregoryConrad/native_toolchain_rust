@@ -1,3 +1,7 @@
+## 1.0.7
+
+ - **FIX**: don't throw error when lib.name is null ([#104](https://github.com/GregoryConrad/native_toolchain_rust/issues/104)).
+
 ## 1.0.6
 
  - **FIX**: resolve rustup from HOME when not in PATH ([#99](https://github.com/GregoryConrad/native_toolchain_rust/issues/99)).

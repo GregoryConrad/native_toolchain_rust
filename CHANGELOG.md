@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-09-10
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`native_toolchain_rust` - `v1.0.7`](#native_toolchain_rust---v107)
+
+---
+
+#### `native_toolchain_rust` - `v1.0.7`
+
+ - **FIX**: don't throw error when lib.name is null ([#104](https://github.com/GregoryConrad/native_toolchain_rust/issues/104)).
+
+
 ## 2026-08-18
 
 ### Changes
