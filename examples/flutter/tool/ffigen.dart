@@ -2,15 +2,20 @@ import 'dart:io';
 
 import 'package:ffigen/ffigen.dart';
 
-void main() {
+Future<void> main() async {
   final packageRoot = Platform.script.resolve('../');
-  FfiGenerator(
-    headers: Headers(entryPoints: [packageRoot.resolve('rust/bindings.h')]),
-    output: Output(dartFile: packageRoot.resolve('lib/src/ffi.g.dart')),
-    functions: Functions.includeSet({
-      'reset_count',
-      'increase_count',
-      'get_count',
-    }),
+  await FfiGenerator(
+    input: Input(entryPoints: [packageRoot.resolve('rust/bindings.h')]),
+    output: Output(
+      dart: DartOutput(path: packageRoot.resolve('lib/src/ffi.g.dart')),
+    ),
+    visitors: [
+      Visitor(
+        func: (node) {
+          const toInclude = {'reset_count', 'increase_count', 'get_count'};
+          node.isIncluded = toInclude.contains(node.originalName);
+        },
+      ),
+    ],
   ).generate();
 }
