@@ -30,19 +30,16 @@ void main() {
       expect(result.path, equals(crateDir.path));
     });
 
-    test(
-      'resolveCrateDirectory throws RustValidationException '
-      'if no directory exists',
-      () {
-        expect(
-          () => resolver.resolveCrateDirectory(
-            rootPath: tempDir.path,
-            cratePathOptions: ['non_existent_crate'],
-          ),
-          throwsA(isA<RustValidationException>()),
-        );
-      },
-    );
+    test('resolveCrateDirectory throws RustValidationException '
+        'if no directory exists', () {
+      expect(
+        () => resolver.resolveCrateDirectory(
+          rootPath: tempDir.path,
+          cratePathOptions: ['non_existent_crate'],
+        ),
+        throwsA(isA<RustValidationException>()),
+      );
+    });
 
     test('resolveCrateDirectory returns the first existing directory', () {
       final crateDir1 = Directory(path.join(tempDir.path, 'crate1'));

@@ -30,10 +30,9 @@ void main() {
           libCrateTypes: ['staticlib', 'cdylib'],
         ),
       );
-      when(() => mockToolchainTomlParser.parseToolchainToml(any())).thenReturn((
-        channel: '1.90.0',
-        targets: {'aarch64-linux-android'},
-      ));
+      when(
+        () => mockToolchainTomlParser.parseToolchainToml(any()),
+      ).thenReturn((channel: '1.90.0', targets: {'aarch64-linux-android'}));
 
       final result = validator.fetchAndValidateCrateInfo(
         manifestPath: 'dummy_manifest_path',
@@ -52,10 +51,9 @@ void main() {
           libCrateTypes: ['staticlib'],
         ),
       );
-      when(() => mockToolchainTomlParser.parseToolchainToml(any())).thenReturn((
-        channel: 'stable',
-        targets: {'x86_64-linux-gnu'},
-      ));
+      when(
+        () => mockToolchainTomlParser.parseToolchainToml(any()),
+      ).thenReturn((channel: 'stable', targets: {'x86_64-linux-gnu'}));
 
       expect(
         () => validator.fetchAndValidateCrateInfo(

@@ -34,9 +34,7 @@ interface class BuildEnvironmentFactory {
 interface class AndroidBuildEnvironmentFactory {
   const AndroidBuildEnvironmentFactory();
 
-  Map<String, String> createBuildEnvVars({
-    required CodeConfig codeConfig,
-  }) {
+  Map<String, String> createBuildEnvVars({required CodeConfig codeConfig}) {
     final CodeConfig(:targetTriple, :cCompiler) = codeConfig;
     if (cCompiler == null) {
       throw UnsupportedError(

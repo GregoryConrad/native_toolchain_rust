@@ -18,9 +18,7 @@ interface class CrateInfoValidator {
     required String toolchainTomlPath,
     required String targetTriple,
   }) {
-    final manifest = cargoManifestParser.parseManifest(
-      manifestPath,
-    );
+    final manifest = cargoManifestParser.parseManifest(manifestPath);
 
     final [
       String? libName,
@@ -29,13 +27,8 @@ interface class CrateInfoValidator {
     ] = RustValidationException.compose<dynamic>([
       () => manifest.libName,
       () {
-        final CargoManifest(
-          :libName,
-          :crateName,
-          :libCrateTypes,
-        ) = cargoManifestParser.parseManifest(
-          manifestPath,
-        );
+        final CargoManifest(:libName, :crateName, :libCrateTypes) =
+            cargoManifestParser.parseManifest(manifestPath);
 
         const requiredTypes = ['staticlib', 'cdylib'];
         if (!requiredTypes.every(libCrateTypes.contains)) {
