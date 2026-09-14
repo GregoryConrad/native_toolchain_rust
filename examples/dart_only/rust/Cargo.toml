@@ -7,6 +7,6 @@ edition = "2024"
 crate-type = ["staticlib", "cdylib", "lib"]
 
 [build-dependencies]
-bindgen = "0.72.1"
+bindgen = "0.73.2"
 cc = "1.2.39"
 cbindgen = "0.29.0"
