@@ -18,27 +18,27 @@ melos:
   scripts:
     test:
       description: Run unit tests for a specific package in this project.
-      run: flutter test test
       packageFilters:
         dirExists: test
       exec:
+        command: flutter test test
         concurrency: 1
         failFast: true
 
     integration-test:
       description: Run integration tests for a specific package in this project.
-      run: flutter test integration_test -d $DEVICE
       packageFilters:
         dirExists: integration_test
       exec:
+        command: flutter test integration_test -d $DEVICE
         concurrency: 1
         failFast: true
 
     init-integration-test-boilerplate:
       description: Create integration test boilerplate for a specific package in this project.
-      run: flutter create .
       packageFilters:
         dirExists: integration_test
       exec:
+        command: flutter create .
         concurrency: 1
         failFast: true
