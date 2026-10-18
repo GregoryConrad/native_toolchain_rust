@@ -30,7 +30,7 @@ melos:
       packageFilters:
         dirExists: integration_test
       exec:
-        command: flutter test integration_test -d $DEVICE
+        command: flutter test integration_test
         concurrency: 1
         failFast: true
 
