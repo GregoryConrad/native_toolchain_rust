@@ -89,3 +89,15 @@ targets = [
   "x86_64-apple-darwin",
 ]
 ```
+
+## Android 16 KB page sizes
+On the 64 bit Android targets (`aarch64-linux-android` and `x86_64-linux-android`),
+your library is linked with `-Wl,-z,max-page-size=16384`
+so that it supports 16 KB page sizes, which
+[Google Play requires](https://developer.android.com/guide/practices/page-sizes)
+for apps targeting Android 15 or later.
+NDK r28 and newer already do this by default, but older NDKs align on 4 KB.
+The flag is added by a small wrapper around the NDK's `clang`,
+so your own `rustflags` are left untouched;
+if you need a different page size, pass it yourself
+(e.g., `-C link-arg=-Wl,-z,max-page-size=4096`) and yours will take precedence.
