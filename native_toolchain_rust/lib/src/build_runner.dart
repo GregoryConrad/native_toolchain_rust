@@ -106,7 +106,10 @@ interface class RustBuildRunner {
         ...extraCargoBuildArgs,
       ],
       environment: {
-        ...buildEnvironmentFactory.createBuildEnvVars(codeConfig),
+        ...buildEnvironmentFactory.createBuildEnvVars(
+          codeConfig,
+          outputDirectory: path.fromUri(input.outputDirectory),
+        ),
         ...extraCargoEnvironmentVariables,
       },
     );

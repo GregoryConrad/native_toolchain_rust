@@ -111,3 +111,16 @@ jobs:
           ram-size: 1024M
           disk-size: 2048M
           script: melos run integration-test -- -d `flutter devices | grep android | tr ' ' '\n' | grep emulator-`
+      # NOTE: Flutter hands the build hook whichever NDK it finds first
+      # (e.g., ANDROID_NDK_HOME), and NDKs older than r28 align on 4 KB pages
+      - name: Check 16 KB page alignment of the Android library
+        run: |
+          unzip -o -q examples/flutter/build/app/outputs/flutter-apk/app-debug.apk 'lib/*/libflutter_example.so' -d "$RUNNER_TEMP/apk"
+          for lib in "$RUNNER_TEMP"/apk/lib/*/libflutter_example.so; do
+            alignments=$(readelf -lW "$lib" | awk '$1 == "LOAD" { print $NF }')
+            echo "$lib:" $alignments
+            [ -n "$alignments" ]
+            for alignment in $alignments; do
+              (( alignment >= 0x4000 ))
+            done
+          done
