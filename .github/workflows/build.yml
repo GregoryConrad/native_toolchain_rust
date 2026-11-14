@@ -39,7 +39,10 @@ jobs:
       - name: Dart format
         run: dart format --set-exit-if-changed .
       - name: Dart tests
-        run: melos run test
+        run: |
+          for package in native_toolchain_rust examples/dart_only examples/flutter; do
+            (cd "$package" && flutter test test)
+          done
 
   macos_integration_test:
     runs-on: macos-latest

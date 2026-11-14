@@ -13,14 +13,3 @@ workspace:
 dev_dependencies:
   melos: ^8.10.1
   very_good_analysis: ^11.0.0
-
-melos:
-  scripts:
-    test:
-      description: Run unit tests for a specific package in this project.
-      packageFilters:
-        dirExists: test
-      exec:
-        command: flutter test test
-        concurrency: 1
-        failFast: true
