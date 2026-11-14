@@ -46,62 +46,65 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
-      - uses: bluefireteam/melos-action@v3
-      - run: melos run init-integration-test-boilerplate
-      - run: melos run integration-test -- -d macos
+      - run: flutter create .
+        working-directory: examples/flutter
+      - run: flutter test integration_test -d macos
+        working-directory: examples/flutter
 
   windows_integration_test:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
-      - uses: bluefireteam/melos-action@v3
-      - run: melos run init-integration-test-boilerplate
-      - run: melos run integration-test -- -d windows
+      - run: flutter create .
+        working-directory: examples/flutter
+      - run: flutter test integration_test -d windows
+        working-directory: examples/flutter
 
   linux_integration_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
-      - uses: bluefireteam/melos-action@v3
       - uses: pyvista/setup-headless-display-action@v3
       - name: Install dependencies for flutter integration test
         run: sudo apt update && sudo apt-get install -y libglu1-mesa ninja-build clang cmake pkg-config libgtk-3-dev liblzma-dev
-      - run: melos run init-integration-test-boilerplate
-      - run: melos run integration-test -- -d linux
+      - run: flutter create .
+        working-directory: examples/flutter
+      - run: flutter test integration_test -d linux
+        working-directory: examples/flutter
 
   ios_integration_test:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
-      - uses: bluefireteam/melos-action@v3
       - name: Start iOS Simulator
         uses: futureware-tech/simulator-action@v4
         id: start_simulator
         with:
           wait_for_boot: true
-      - run: melos run init-integration-test-boilerplate
+      - run: flutter create .
+        working-directory: examples/flutter
       # NOTE: we often get timeouts without a couple retries due to flakey macOS runners
       - name: Run Flutter integration tests
         uses: Wandalen/wretry.action@v3
         with:
           attempt_limit: 5
-          command: melos run integration-test -- -d ${{ steps.start_simulator.outputs.udid }}
+          command: cd examples/flutter && flutter test integration_test -d ${{ steps.start_simulator.outputs.udid }}
 
   android_integration_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
-      - uses: bluefireteam/melos-action@v3
       - name: Enable KVM for Android emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - run: melos run init-integration-test-boilerplate
+      - run: flutter create .
+        working-directory: examples/flutter
       - name: Run Flutter integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -110,4 +113,4 @@ jobs:
           arch: x86_64
           ram-size: 1024M
           disk-size: 2048M
-          script: melos run integration-test -- -d `flutter devices | grep android | tr ' ' '\n' | grep emulator-`
+          script: cd examples/flutter && flutter test integration_test -d `flutter devices | grep android | tr ' ' '\n' | grep emulator-`

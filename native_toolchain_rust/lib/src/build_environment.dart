@@ -73,12 +73,15 @@ interface class AndroidBuildEnvironmentFactory {
       _ => targetTriple,
     };
 
-    // NOTE: we need to point to NDK >=27 vended LLVM for Android.
-    // The `${ndkTargetTriple}35-clang`s were introduced in NDK 27,
-    // so using these binaries:
-    // 1. Ensures we are using a compatible NDK
-    // 2. Also fixes build issues when just using the `clang`s directly
-    const apiTarget = '35';
+    // Keep the existing NDK >=27 compatibility check independent of the
+    // minimum Android API requested by the hook invoker.
+    getBinaryPath('${ndkTargetTriple}35-clang');
+    getBinaryPath('${ndkTargetTriple}35-clang++');
+
+    // Target-specific wrappers also supply the API level to native compilation
+    // and linking. A higher level can make the library incompatible with the
+    // application's declared minimum SDK.
+    final apiTarget = codeConfig.android.targetNdkApi;
     final clangPath = getBinaryPath('$ndkTargetTriple$apiTarget-clang');
     final clangPpPath = getBinaryPath('$ndkTargetTriple$apiTarget-clang++');
     final ranlibPath = getBinaryPath('llvm-ranlib', windowsSuffix: 'exe');
