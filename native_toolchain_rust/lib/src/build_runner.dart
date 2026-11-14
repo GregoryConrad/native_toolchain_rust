@@ -75,6 +75,7 @@ interface class RustBuildRunner {
       :toolchainChannel,
     ) = crateInfoValidator.fetchAndValidateCrateInfo(
       targetTriple: targetTriple,
+      linkMode: linkMode,
       manifestPath: manifestPath,
       toolchainTomlPath: path.join(crateDirectory.path, 'rust-toolchain.toml'),
     );
