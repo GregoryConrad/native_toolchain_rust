@@ -17,9 +17,7 @@ jobs:
       - uses: cachix/install-nix-action@v31
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Install direnv
-        run: |
-          curl -sfL https://direnv.net/install.sh | bash
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        run: nix profile install --inputs-from . nixpkgs#direnv
       - name: Load environment variables
         run: |
           direnv allow .
