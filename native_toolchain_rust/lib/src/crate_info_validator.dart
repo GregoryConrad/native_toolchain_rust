@@ -1,3 +1,4 @@
+import 'package:code_assets/code_assets.dart';
 import 'package:meta/meta.dart';
 import 'package:native_toolchain_rust/src/exception.dart';
 import 'package:native_toolchain_rust/src/toml_parsing.dart';
@@ -17,6 +18,7 @@ interface class CrateInfoValidator {
     required String manifestPath,
     required String toolchainTomlPath,
     required String targetTriple,
+    required LinkMode linkMode,
   }) {
     final manifest = cargoManifestParser.parseManifest(manifestPath);
 
@@ -30,11 +32,17 @@ interface class CrateInfoValidator {
         final CargoManifest(:libName, :crateName, :libCrateTypes) =
             cargoManifestParser.parseManifest(manifestPath);
 
-        const requiredTypes = ['staticlib', 'cdylib'];
-        if (!requiredTypes.every(libCrateTypes.contains)) {
+        // NOTE: only the crate type for the requested link mode is needed,
+        // so crates that only ship a cdylib can skip building a staticlib.
+        final (requiredType, libraryKind) = switch (linkMode) {
+          StaticLinking() => ('staticlib', 'static'),
+          _ => ('cdylib', 'dynamic'),
+        };
+        if (!libCrateTypes.contains(requiredType)) {
           throw RustValidationException([
             '''
-Your Cargo.toml must specify $requiredTypes under `lib.crate-types`.
+Your Cargo.toml must specify `$requiredType` under `lib.crate-type`,
+because this build requested a $libraryKind library.
 For more information, see https://github.com/GregoryConrad/native_toolchain_rust?tab=readme-ov-file#cargotoml''',
           ]);
         }

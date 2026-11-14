@@ -53,7 +53,8 @@ Keep at least the following in your `Cargo.toml`.
 name = "my-crate-name" # pick a name, doesn't matter
 
 [lib]
-crate-type = ["staticlib", "cdylib"] # THESE ARE IMPORTANT!
+crate-type = ["cdylib"] # THIS IS IMPORTANT!
+# Add "staticlib" too only if your build may request static linking.
 ```
 
 ### `rust-toolchain.toml`
