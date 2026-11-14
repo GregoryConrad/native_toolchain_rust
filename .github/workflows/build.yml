@@ -16,10 +16,12 @@ jobs:
       - uses: actions/checkout@v5
       - uses: cachix/install-nix-action@v31
       - uses: DeterminateSystems/magic-nix-cache-action@main
+      # NOTE: direnv's install script queries the GitHub API without a token,
+      # which often gets rate limited (HTTP 403) on shared runners.
+      # Nix is already set up (with the workflow's token), so use the
+      # nixpkgs pinned in flake.lock instead.
       - name: Install direnv
-        run: |
-          curl -sfL https://direnv.net/install.sh | bash
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        run: nix profile install --inputs-from . nixpkgs#direnv
       - name: Load environment variables
         run: |
           direnv allow .
