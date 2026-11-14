@@ -67,7 +67,14 @@ interface class RustBuildRunner {
       rootPath: path.fromUri(input.packageRoot),
       cratePathOptions: cratePath != null ? [cratePath] : ['rust', 'native'],
     );
-    final outputDir = path.join(path.fromUri(input.outputDirectory), 'target');
+    final outputDir = resolveCargoTargetDirectory(
+      defaultDirectory: path.join(
+        path.fromUri(input.outputDirectory),
+        'target',
+      ),
+      extraCargoEnvironmentVariables: extraCargoEnvironmentVariables,
+      processEnvironment: Platform.environment,
+    );
     final manifestPath = path.join(crateDirectory.path, 'Cargo.toml');
     final (
       :libName,
@@ -148,4 +155,35 @@ interface class RustBuildRunner {
     ], workingDirectory: crateDirectory);
     logger.config(showToolchainOutput);
   }
+}
+
+/// The name of Cargo's environment variable for its target directory.
+@internal
+const cargoTargetDirEnvVar = 'CARGO_TARGET_DIR';
+
+/// Resolves the directory passed to `cargo build --target-dir`.
+///
+/// A `CARGO_TARGET_DIR` set by the user wins over the default directory
+/// inside the hook's output directory, because `--target-dir` would otherwise
+/// silently override it. The value in [extraCargoEnvironmentVariables] is
+/// checked first, followed by the hook's own process environment.
+///
+/// This is useful when the default directory is too deeply nested for a tool
+/// invoked by the crate's build scripts, such as MSBuild on Windows.
+@internal
+String resolveCargoTargetDirectory({
+  required String defaultDirectory,
+  required Map<String, String> extraCargoEnvironmentVariables,
+  required Map<String, String> processEnvironment,
+}) {
+  for (final environment in [
+    extraCargoEnvironmentVariables,
+    processEnvironment,
+  ]) {
+    final targetDirectory = environment[cargoTargetDirEnvVar];
+    if (targetDirectory != null && targetDirectory.isNotEmpty) {
+      return path.absolute(targetDirectory);
+    }
+  }
+  return defaultDirectory;
 }
