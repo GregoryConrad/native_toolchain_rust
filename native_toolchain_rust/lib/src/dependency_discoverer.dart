@@ -21,9 +21,27 @@ interface class DependencyDiscoverer {
   /// coverage for incremental rebuilds.
   Iterable<Uri> discover(String dependencyFilePath) {
     logger.fine('Discovering dependencies in $dependencyFilePath');
-    return File(dependencyFilePath)
-        .readAsLinesSync()
-        .expand((line) => line.trim().split(' ').skip(1))
-        .map(path.toUri);
+    final rawContent = File(dependencyFilePath).readAsStringSync();
+    // Normalize line continuations (backslash followed by newline).
+    final normalized = rawContent.replaceAll(RegExp(r'\\\r?\n'), ' ');
+    final result = <Uri>[];
+    for (final line in normalized.split(RegExp(r'\r?\n'))) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) continue;
+      final colonIndex = trimmed.indexOf(': ');
+      final depsString = colonIndex != -1
+          ? trimmed.substring(colonIndex + 2)
+          : trimmed;
+      // Cargo/Make dep-info escapes spaces in file paths with a backslash ('\ ').
+      // Split only on whitespace that is not preceded by a backslash.
+      final rawTokens = depsString.split(RegExp(r'(?<!\\) +'));
+      for (final token in rawTokens) {
+        final unescaped = token.replaceAll(r'\ ', ' ').trim();
+        if (unescaped.isNotEmpty) {
+          result.add(path.toUri(unescaped));
+        }
+      }
+    }
+    return result;
   }
 }

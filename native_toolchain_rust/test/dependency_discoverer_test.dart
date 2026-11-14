@@ -78,6 +78,30 @@ target/debug/librust_lib.a: /path/to/some/other/file.rs
       expect(dependencies, isNot(contains(path.toUri(dependencyFilePath))));
     });
 
+    test('discover correctly parses paths with escaped spaces and '
+        'line continuations', () {
+      final dependencyFilePath = path.join(tempDir.path, 'test.d');
+      File(dependencyFilePath).writeAsStringSync(
+        'target/debug/librust_lib.a: src/lib.rs '
+        r'C:\Users\John\ Doe\lib.rs'
+        '\n'
+        'target/debug/librust_lib.a: /path/with\\ space/mod.rs \\\n'
+        '  /continuation/path.rs',
+      );
+
+      final dependencies = dependencyDiscoverer.discover(dependencyFilePath);
+
+      expect(
+        dependencies,
+        unorderedEquals([
+          path.toUri('src/lib.rs'),
+          path.toUri(r'C:\Users\John Doe\lib.rs'),
+          path.toUri('/path/with space/mod.rs'),
+          path.toUri('/continuation/path.rs'),
+        ]),
+      );
+    });
+
     test(
       'discover throws an exception if the dependency file is not found',
       () {
