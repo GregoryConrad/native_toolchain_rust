@@ -139,9 +139,12 @@ interface class RustBuildRunner {
     );
 
     // NOTE: re-run build whenever any of the dependencies change
-    output.dependencies.addAll(
-      dependencyDiscoverer.discover(path.setExtension(binaryFilePath, '.d')),
-    );
+    output.dependencies.addAll({
+      ...dependencyDiscoverer.discover(path.setExtension(binaryFilePath, '.d')),
+      ...dependencyDiscoverer.discoverCrateConfigurationFiles(
+        crateDirectory.path,
+      ),
+    });
 
     for (final routing in assetRouting) {
       output.assets.code.add(

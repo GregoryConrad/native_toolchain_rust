@@ -112,5 +112,49 @@ target/debug/librust_lib.a: /path/to/some/other/file.rs
         );
       },
     );
+
+    test('discoverCrateConfigurationFiles finds manifest, build script, '
+        'toolchain and the nearest Cargo.lock', () {
+      final workspace = Directory(path.join(tempDir.path, 'workspace'));
+      final crate = Directory(path.join(workspace.path, 'crates', 'my_crate'))
+        ..createSync(recursive: true);
+      for (final name in ['Cargo.toml', 'build.rs', 'rust-toolchain.toml']) {
+        File(path.join(crate.path, name)).writeAsStringSync('');
+      }
+      File(path.join(workspace.path, 'Cargo.lock')).writeAsStringSync('');
+      // A Cargo.lock further up must not be picked over the nearest one.
+      File(path.join(tempDir.path, 'Cargo.lock')).writeAsStringSync('');
+
+      final files = dependencyDiscoverer.discoverCrateConfigurationFiles(
+        crate.path,
+      );
+
+      expect(
+        files.map((uri) => path.canonicalize(path.fromUri(uri))),
+        unorderedEquals([
+          for (final name in ['Cargo.toml', 'build.rs', 'rust-toolchain.toml'])
+            path.canonicalize(path.join(crate.path, name)),
+          path.canonicalize(path.join(workspace.path, 'Cargo.lock')),
+        ]),
+      );
+    });
+
+    test('discoverCrateConfigurationFiles skips files that do not exist', () {
+      final crate = Directory(path.join(tempDir.path, 'crate'))..createSync();
+      File(path.join(crate.path, 'Cargo.toml')).writeAsStringSync('');
+
+      final files = dependencyDiscoverer.discoverCrateConfigurationFiles(
+        crate.path,
+      );
+
+      expect(
+        files.map((uri) => path.canonicalize(path.fromUri(uri))),
+        contains(path.canonicalize(path.join(crate.path, 'Cargo.toml'))),
+      );
+      expect(
+        files.map((uri) => path.basename(path.fromUri(uri))),
+        isNot(contains('build.rs')),
+      );
+    });
   });
 }
