@@ -90,3 +90,10 @@ targets = [
   "x86_64-apple-darwin",
 ]
 ```
+
+### Android 16 KB page sizes
+On `aarch64-linux-android` and `x86_64-linux-android`, your library is linked to support
+[16 KB page sizes](https://developer.android.com/guide/practices/page-sizes),
+even with NDKs older than r28.
+If you set your own `rustflags` (in `RUSTFLAGS` or a Cargo config),
+add `-C link-arg=-Wl,-z,max-page-size=16384` to them for these targets.
