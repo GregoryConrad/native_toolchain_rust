@@ -157,10 +157,6 @@ interface class RustBuildRunner {
   }
 }
 
-/// The name of Cargo's environment variable for its target directory.
-@internal
-const cargoTargetDirEnvVar = 'CARGO_TARGET_DIR';
-
 /// Resolves the directory passed to `cargo build --target-dir`.
 ///
 /// A `CARGO_TARGET_DIR` set by the user wins over the default directory
@@ -180,7 +176,7 @@ String resolveCargoTargetDirectory({
     extraCargoEnvironmentVariables,
     processEnvironment,
   ]) {
-    final targetDirectory = environment[cargoTargetDirEnvVar];
+    final targetDirectory = environment['CARGO_TARGET_DIR'];
     if (targetDirectory != null && targetDirectory.isNotEmpty) {
       return path.absolute(targetDirectory);
     }
