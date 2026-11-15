@@ -1,3 +1,7 @@
+## 1.1.1
+
+ - **FIX**: rebuild when the crate's manifest, lockfile, build script or toolchain changes ([#130](https://github.com/GregoryConrad/native_toolchain_rust/issues/130)).
+
 ## 1.1.0
 
  - **FIX**: support 16 KB page sizes on 64 bit Android targets ([#126](https://github.com/GregoryConrad/native_toolchain_rust/issues/126)).

@@ -15,6 +15,27 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`native_toolchain_rust` - `v1.1.1`](#native_toolchain_rust---v111)
+
+---
+
+#### `native_toolchain_rust` - `v1.1.1`
+
+ - **FIX**: rebuild when the crate's manifest, lockfile, build script or toolchain changes ([#130](https://github.com/GregoryConrad/native_toolchain_rust/issues/130)).
+
+
+## 2026-11-14
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`native_toolchain_rust` - `v1.1.0`](#native_toolchain_rust---v110)
 
 ---
