@@ -1,3 +1,11 @@
+## 1.1.0
+
+ - **FIX**: support 16 KB page sizes on 64 bit Android targets ([#126](https://github.com/GregoryConrad/native_toolchain_rust/issues/126)).
+ - **FIX**: respect a user-provided CARGO_TARGET_DIR ([#125](https://github.com/GregoryConrad/native_toolchain_rust/issues/125)).
+ - **FIX**: require only the crate type for the requested link mode ([#124](https://github.com/GregoryConrad/native_toolchain_rust/issues/124)).
+ - **FIX**: handle paths with escaped spaces in Cargo dep-info files ([#121](https://github.com/GregoryConrad/native_toolchain_rust/issues/121)).
+ - **FEAT**: honor the Android API requested by Rust build hooks ([#122](https://github.com/GregoryConrad/native_toolchain_rust/issues/122)).
+
 ## 1.0.7
 
  - **FIX**: don't throw error when lib.name is null ([#104](https://github.com/GregoryConrad/native_toolchain_rust/issues/104)).

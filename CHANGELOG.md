@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-11-14
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`native_toolchain_rust` - `v1.1.0`](#native_toolchain_rust---v110)
+
+---
+
+#### `native_toolchain_rust` - `v1.1.0`
+
+ - **FIX**: support 16 KB page sizes on 64 bit Android targets ([#126](https://github.com/GregoryConrad/native_toolchain_rust/issues/126)).
+ - **FIX**: respect a user-provided CARGO_TARGET_DIR ([#125](https://github.com/GregoryConrad/native_toolchain_rust/issues/125)).
+ - **FIX**: require only the crate type for the requested link mode ([#124](https://github.com/GregoryConrad/native_toolchain_rust/issues/124)).
+ - **FIX**: handle paths with escaped spaces in Cargo dep-info files ([#121](https://github.com/GregoryConrad/native_toolchain_rust/issues/121)).
+ - **FEAT**: honor the Android API requested by Rust build hooks ([#122](https://github.com/GregoryConrad/native_toolchain_rust/issues/122)).
+
+
 ## 2026-09-10
 
 ### Changes

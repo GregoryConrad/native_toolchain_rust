@@ -9,7 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
   hooks: ^2.1.0
-  native_toolchain_rust: ^1.0.7
+  native_toolchain_rust: ^1.1.0
 
 dev_dependencies:
   ffigen: ^23.0.0
