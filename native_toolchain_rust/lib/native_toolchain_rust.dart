@@ -74,6 +74,10 @@ final class RustBuilder implements Builder {
   /// Please file an issue with your use-case for it, if you do use it.
   ///
   /// Extra environment variables to set for `cargo build`. Often not needed.
+  ///
+  /// Setting `CARGO_TARGET_DIR` here (or in the hook's environment) changes
+  /// the directory Cargo builds into, which can help when the default
+  /// directory is nested too deeply for tools like MSBuild on Windows.
   @experimental
   final Map<String, String> extraCargoEnvironmentVariables;
 
